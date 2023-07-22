@@ -4,6 +4,7 @@
 #define MAX_PLAYERS 32
 
 new g_ReactStartTime[MAX_PLAYERS+1]
+new g_IsEnemyVisible[MAX_PLAYERS+1]
 
 public plugin_init()
 {
@@ -12,6 +13,8 @@ public plugin_init()
     register_event("HLTV", "event_player_death", "ah", "1=delayed")
 
     register_event("HLTV", "event_player_kill", "ahh", "1=delayed")
+    
+    register_event("HLTV", "event_player_say", "ab", "1=delayed")
 }
 
 public event_player_death(victim, inflictor, attacker)
@@ -30,7 +33,31 @@ public event_player_kill(killer, victim, weapon)
 {
     if (killer > 0 && killer <= get_maxplayers())
     {
-        g_ReactStartTime[killer] = get_gametime()
+        // Start the timer if the enemy is visible
+        if (g_IsEnemyVisible[killer])
+            g_ReactStartTime[killer] = get_gametime()
+    }
+
+    return PLUGIN_CONTINUE
+}
+
+public event_player_say(id, const[] msg[])
+{
+    if (id <= 0 || id > get_maxplayers())
+        return PLUGIN_CONTINUE
+
+    new i, attacker, target
+
+    // Check if the message contains player IDs
+    if (sscanf(msg, "%i %i", attacker, target) == 2)
+    {
+        // Mark the attacker's enemy as visible
+        if (attacker > 0 && attacker <= get_maxplayers() && target > 0 && target <= get_maxplayers())
+            g_IsEnemyVisible[attacker] = true
+
+        // Reset the timer for the target
+        if (target > 0 && target <= get_maxplayers())
+            g_ReactStartTime[target] = 0
     }
 
     return PLUGIN_CONTINUE
