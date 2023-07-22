@@ -23,6 +23,8 @@ An AMX plugin that measures player reaction time
 
 ## TODO
 **Output**: Use .dem as input and then get list of shots fired as output, i.e.
-player, enemy, timestamp (enemy seen), reaction time (shot fired timestamp - enemy seen timestamp), weapon
-heaton, sunman, 32:10, 0.2, ak-47
-heaton, warden, 32:15, 0.1, ak-47
+
+| player        | enemy         | timestamp (enemy seen)  | reaction time (shot fired timestamp - enemy seen timestamp)  | weapon           |
+| ------------- |:-------------:|:-----------------------:|:------------------------------------------------------------:|:----------------:|
+| heaton        | sunman        | 32:10                   | 0.2                                                          | AK47             |
+| heaton        | warden        | 32:15                   | 0.1                                                          | AK47             |
