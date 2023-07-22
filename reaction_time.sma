@@ -7,7 +7,7 @@ new g_ReactStartTime[MAX_PLAYERS+1]
 
 public plugin_init()
 {
-    register_plugin("Reaction Time", "1.0", "Your Name")
+    register_plugin("Reaction Time", "1.0", "Classic Strike")
 
     register_event("HLTV", "event_player_death", "ah", "1=delayed")
 
