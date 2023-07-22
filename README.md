@@ -12,6 +12,15 @@ An AMX plugin that measures player reaction time
 
 **Time to aim** vs **time to fire**:  The timer stops when the player fires, not when the cursor starts moving towards the enemy nor is on the enemy nor when enemy is killed. If the player takes longer to aim before firing then their reaction time is slower. It's separate from accuracy, a player can have fast reaction time but bad accuracy and vice versa.
 
+## visual representation
+
+#### fast:
+![Fast](https://raw.githubusercontent.com/classicstrike/amx-reaction-time/main/fast.png)
+
+#### slow:
+![Slow](https://raw.githubusercontent.com/classicstrike/amx-reaction-time/main/slow.png)
+
+
 ## TODO
 **Output**: Use .dem as input and then get list of shots fired as output, i.e.
 player, enemy, timestamp (enemy seen), reaction time (shot fired timestamp - enemy seen timestamp), weapon
