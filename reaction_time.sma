@@ -1,64 +1,72 @@
-#include <amxmodx>
-#include <hamsandwich>
+#include < amxmodx > // Include the AMX Mod X module
 
-#define MAX_PLAYERS 32
+// Constants
+const Float:TIME_RESET = -1.0 // Represents an invalid timer value
+const Float:TIMER_THRESHOLD = 1.0 // Minimum time threshold for reaction time measurement
 
-new g_ReactStartTime[MAX_PLAYERS+1]
-new g_IsEnemyVisible[MAX_PLAYERS+1]
+// Variables
+new g_PlayerTimers[33] // Array to store timers for each player (assuming max 32 players)
+new g_PlayerAiming[33] // Array to store aiming status for each player
+new g_PlayerVisible[33] // Array to store visibility status for each player
 
-public plugin_init()
+// Function to start/reset player reaction time timer
+StartReactionTimeTimer(id)
 {
-    register_plugin("Reaction Time", "1.0", "Classic Strike")
-
-    register_event("HLTV", "event_player_death", "ah", "1=delayed")
-
-    register_event("HLTV", "event_player_kill", "ahh", "1=delayed")
-    
-    register_event("HLTV", "event_player_say", "ab", "1=delayed")
+    g_PlayerTimers[id] = get_gametime() // Store the current server time as the start time
+    g_PlayerAiming[id] = true // Set aiming status to true (player aiming at an enemy)
+    g_PlayerVisible[id] = true // Set visibility status to true (enemy visible)
 }
 
-public event_player_death(victim, inflictor, attacker)
+// Function to stop player reaction time timer and calculate reaction time
+StopReactionTimeTimer(id)
 {
-    if (attacker > 0 && attacker <= get_maxplayers() && g_ReactStartTime[attacker] > 0)
+    if (g_PlayerTimers[id] > 0.0) // Check if the timer is valid
     {
-        new reactionTime = get_gametime() - g_ReactStartTime[attacker]
-        client_print(attacker, print_console, "Your reaction time: %0.2f seconds", reactionTime)
-        g_ReactStartTime[attacker] = 0
+        new reactionTime = get_gametime() - g_PlayerTimers[id] // Calculate reaction time
+        if (reactionTime >= TIMER_THRESHOLD) // Check if reaction time is above the threshold
+        {
+            // Print or store the reaction time value (e.g., send it to the player or log it)
+            client_print(id, print_chat, "Your reaction time: %.2f seconds", reactionTime)
+        }
+        g_PlayerTimers[id] = TIME_RESET // Reset the timer
+        g_PlayerAiming[id] = false // Reset aiming status
+        g_PlayerVisible[id] = false // Reset visibility status
     }
-
-    return PLUGIN_CONTINUE
 }
 
-public event_player_kill(killer, victim, weapon)
+// Hook: Called when a player shoots
+public client_cmd(command[], id)
 {
-    if (killer > 0 && killer <= get_maxplayers())
+    if (equal(command, "attack")) // Check if the player is firing
     {
-        // Start the timer if the enemy is visible
-        if (g_IsEnemyVisible[killer])
-            g_ReactStartTime[killer] = get_gametime()
+        if (g_PlayerAiming[id]) // If the player was aiming at an enemy
+        {
+            StopReactionTimeTimer(id) // Stop the reaction time timer
+        }
     }
-
-    return PLUGIN_CONTINUE
 }
 
-public event_player_say(id, const[] msg[])
+// Hook: Called when a player sees an enemy
+public client_prethink(id)
 {
-    if (id <= 0 || id > get_maxplayers())
-        return PLUGIN_CONTINUE
+    new aimEntity = pev(id, pev_v_angle) // Get the player's view angles
+    new aimVec[3], aimEnd[3], aimLineTrace // Vectors for aiming
 
-    new i, attacker, target
+    angleVectors(aimEntity, aimVec) // Get the aiming vector
+    aimEnd = aimVec * 8192.0 + pev(id, pev_origin) // Calculate the end position of the aim line trace
 
-    // Check if the message contains player IDs
-    if (sscanf(msg, "%i %i", attacker, target) == 2)
+    aimLineTrace = trace_line(pev(id, pev_origin), aimEnd, true, id) // Perform a line trace to check visibility
+
+    if (aimLineTrace == 1) // Check if the line trace hit an entity (enemy)
     {
-        // Mark the attacker's enemy as visible
-        if (attacker > 0 && attacker <= get_maxplayers() && target > 0 && target <= get_maxplayers())
-            g_IsEnemyVisible[attacker] = true
-
-        // Reset the timer for the target
-        if (target > 0 && target <= get_maxplayers())
-            g_ReactStartTime[target] = 0
+        if (!g_PlayerVisible[id]) // If the player was not previously visible
+        {
+            StartReactionTimeTimer(id) // Start/reset the reaction time timer
+        }
+        g_PlayerVisible[id] = true // Set visibility status to true (enemy visible)
     }
-
-    return PLUGIN_CONTINUE
+    else
+    {
+        g_PlayerVisible[id] = false // Set visibility status to false (enemy not visible)
+    }
 }
