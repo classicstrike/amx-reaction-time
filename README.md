@@ -26,5 +26,5 @@ An AMX plugin that measures player reaction time
 
 | player        | enemy         | timestamp (enemy seen)  | reaction time (shot fired timestamp - enemy seen timestamp)  | weapon           |
 | ------------- |:-------------:|:-----------------------:|:------------------------------------------------------------:|:----------------:|
-| heaton        | sunman        | 32:10                   | 0.2                                                          | AK47             |
-| heaton        | warden        | 32:15                   | 0.1                                                          | AK47             |
+| heaton        | sunman        | 32:10:000               | 0.2 (32:10:000-32:10:200)                                    | AK47             |
+| heaton        | warden        | 32:15:000               | 0.1 (32:15:000-32:15:100)                                    | AK47             |
